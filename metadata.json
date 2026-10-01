@@ -1,0 +1,8 @@
+{
+  "name": "Remix Death at the White Manor - Teambonding Post Event Highlights",
+  "description": "Interactive 1920s Gothic Noir detective case docket for the Death at the White Manor teambonding event, featuring event write-ups, suspect dossiers, manor blueprint, forensic lab, team rosters, photo albums, video theater, and champions podium.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
