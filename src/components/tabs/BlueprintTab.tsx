@@ -22,9 +22,11 @@ interface RoomTarget {
   label: string;
 }
 
-// Precise room coordinate anchors derived from the 1856x4716 architectural layout
+// Precise room and floor coordinate anchors derived from the 1856x4716 architectural layout
 const ROOM_TARGETS: Record<string, RoomTarget> = {
   full: { x: 50, y: 50, scale: 1, label: 'Full Estate Map' },
+  firstFloor: { x: 50, y: 74.5, scale: 2.05, label: 'First Floor Overview' },
+  secondFloor: { x: 50, y: 22, scale: 2.05, label: 'Second Floor Overview' },
   study: { x: 23, y: 74, scale: 2.7, label: "Sir White's Study Room" },
   dining: { x: 48, y: 61, scale: 2.6, label: 'Dining Hall' },
   amber: { x: 22, y: 14, scale: 2.8, label: "Mrs Amber's Bedroom" },
@@ -39,10 +41,13 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
   onNavigateSuspect
 }) => {
   // 'full' represents the zoomed-out fit view of the entire estate map
+  // 'firstFloor' and 'secondFloor' trigger sector-level floor zoom
   const [selectedRoomId, setSelectedRoomId] = useState<string>('full');
   const [floorFilter, setFloorFilter] = useState<'ALL' | 'First Floor' | 'Second Floor'>('ALL');
 
-  const currentRoom = selectedRoomId !== 'full' ? ROOMS[selectedRoomId] : null;
+  const currentRoom = selectedRoomId !== 'full' && selectedRoomId !== 'firstFloor' && selectedRoomId !== 'secondFloor'
+    ? ROOMS[selectedRoomId]
+    : null;
   const currentTarget = ROOM_TARGETS[selectedRoomId] || ROOM_TARGETS.full;
 
   const filteredRooms = Object.values(ROOMS).filter(
@@ -59,6 +64,34 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
     );
   };
 
+  const handleFloorSelect = (floor: 'ALL' | 'First Floor' | 'Second Floor') => {
+    setFloorFilter(floor);
+    if (floor === 'First Floor') {
+      setSelectedRoomId('firstFloor');
+    } else if (floor === 'Second Floor') {
+      setSelectedRoomId('secondFloor');
+    } else {
+      setSelectedRoomId('full');
+    }
+  };
+
+  const handleRoomSelect = (roomId: string) => {
+    setSelectedRoomId(roomId);
+    if (ROOMS[roomId]) {
+      setFloorFilter(ROOMS[roomId].floor);
+    }
+  };
+
+  const handleResetFullMap = () => {
+    setSelectedRoomId('full');
+    setFloorFilter('ALL');
+  };
+
+  const isChamberTarget =
+    selectedRoomId !== 'full' &&
+    selectedRoomId !== 'firstFloor' &&
+    selectedRoomId !== 'secondFloor';
+
   return (
     <section className="flex flex-col gap-2 h-full font-typewriter select-none">
       {/* Header Bar */}
@@ -74,19 +107,24 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Floor Filter Buttons */}
+          {/* Floor Filter Buttons with Smooth Zoom Integration */}
           <div className="flex items-center gap-1 text-[10px]">
             {(['ALL', 'First Floor', 'Second Floor'] as const).map((floor) => (
               <button
                 key={floor}
-                onClick={() => setFloorFilter(floor)}
+                onClick={() => handleFloorSelect(floor)}
                 className={`px-2 py-0.5 rounded border transition-colors cursor-pointer ${
                   floorFilter === floor
-                    ? 'bg-[#87110c] text-white border-red-900 font-bold'
+                    ? 'bg-[#87110c] text-white border-red-900 font-bold shadow-sm'
                     : 'bg-[#d5c39f] hover:bg-[#c4b08a] text-[#332214] border-[#b8a47e]'
                 }`}
+                title={
+                  floor === 'ALL'
+                    ? 'Zoom out to view both floors (Complete Estate)'
+                    : `Zoom in to view only the entire ${floor}`
+                }
               >
-                {floor}
+                {floor === 'ALL' ? 'ALL FLOORS' : floor}
               </button>
             ))}
           </div>
@@ -135,8 +173,8 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
                 className="w-full h-full object-contain pointer-events-auto select-none"
               />
 
-              {/* Pulsing Red Indicator on Targeted Room (Unobstructed, keeping blueprint details clear) */}
-              {selectedRoomId !== 'full' && (
+              {/* Pulsing Red Indicator on Targeted Room (Unobstructed, shown only when an individual chamber is inspected) */}
+              {isChamberTarget && (
                 <div
                   className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center animate-fadeIn"
                   style={{
@@ -155,9 +193,9 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
             {/* Top Left Floating Quick Reset / Zoom Out Button */}
             {selectedRoomId !== 'full' ? (
               <button
-                onClick={() => setSelectedRoomId('full')}
+                onClick={handleResetFullMap}
                 className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 bg-black/85 hover:bg-black text-amber-200 rounded text-[10px] border border-amber-800/70 backdrop-blur-sm transition-all cursor-pointer shadow-lg animate-fadeIn"
-                title="Zoom out to Full Map overview"
+                title="Zoom out to Full Map overview (both floors)"
               >
                 <ZoomOut className="w-3.5 h-3.5 text-amber-400" />
                 <span>ZOOM OUT (FULL MAP)</span>
@@ -170,7 +208,7 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
 
             {/* Bottom Center Floating Label: In scale with page typography, unobstructing the blueprint */}
             {selectedRoomId !== 'full' && (
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-1.5 px-2 py-0.5 bg-black/85 text-amber-200 border border-amber-900/60 rounded backdrop-blur-sm shadow-md animate-fadeIn max-w-[50%] truncate">
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-1.5 px-2.5 py-0.5 bg-black/85 text-amber-200 border border-amber-900/60 rounded backdrop-blur-sm shadow-md animate-fadeIn max-w-[65%] truncate">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse flex-shrink-0"></span>
                 <span className="text-[8.5px] font-courier uppercase tracking-wider font-bold truncate">
                   {currentTarget.label}
@@ -189,22 +227,24 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
             </button>
           </div>
 
-          {/* Room Selector Strip with "Full Map" and Chamber Zoom Buttons */}
+          {/* Room Selector Strip with "Full Map", Floor Overview, and Chamber Zoom Buttons */}
           <div className="pt-2 flex-shrink-0">
             <div className="text-[9px] text-zinc-400 uppercase font-bold mb-1 flex items-center justify-between">
               <span className="flex items-center gap-1">
                 <MapPin className="w-3 h-3 text-red-500" />
-                <span>SELECT CHAMBER TO ZOOM IN:</span>
+                <span>SELECT CHAMBER OR SECTOR TO ZOOM IN:</span>
               </span>
               <span className="text-amber-400 font-courier text-[8.5px]">
-                {selectedRoomId === 'full' ? 'FULL ESTATE' : currentTarget.label.toUpperCase()}
+                {selectedRoomId === 'full'
+                  ? 'FULL ESTATE'
+                  : currentTarget.label.toUpperCase()}
               </span>
             </div>
 
             <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 text-[9px] text-center">
               {/* Full Map (Default Zoom-out Option) */}
               <button
-                onClick={() => setSelectedRoomId('full')}
+                onClick={handleResetFullMap}
                 className={`p-1 sm:p-1.5 rounded border transition-all cursor-pointer font-bold flex items-center justify-center gap-1 ${
                   selectedRoomId === 'full'
                     ? 'bg-[#87110c] text-white border-red-800 shadow-md ring-1 ring-red-400'
@@ -216,13 +256,32 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
                 <span className="truncate">FULL MAP</span>
               </button>
 
+              {/* Dedicated Floor Sector Button when filtered */}
+              {floorFilter !== 'ALL' && (
+                <button
+                  onClick={() =>
+                    setSelectedRoomId(
+                      floorFilter === 'First Floor' ? 'firstFloor' : 'secondFloor'
+                    )
+                  }
+                  className={`p-1 sm:p-1.5 rounded border transition-all truncate cursor-pointer font-bold ${
+                    selectedRoomId === 'firstFloor' || selectedRoomId === 'secondFloor'
+                      ? 'bg-[#87110c] text-white border-red-800 shadow-md ring-1 ring-red-400'
+                      : 'bg-[#2a221d] hover:bg-[#3d3128] text-amber-100/90 border-zinc-700'
+                  }`}
+                  title={`Zoom to entire ${floorFilter}`}
+                >
+                  {floorFilter === 'First Floor' ? '1ST FLR (ALL)' : '2ND FLR (ALL)'}
+                </button>
+              )}
+
               {/* Individual Rooms that trigger interactive zoom-in */}
               {filteredRooms.map((room) => {
                 const isSelected = selectedRoomId === room.id;
                 return (
                   <button
                     key={room.id}
-                    onClick={() => setSelectedRoomId(room.id)}
+                    onClick={() => handleRoomSelect(room.id)}
                     className={`p-1 sm:p-1.5 rounded border transition-all truncate cursor-pointer ${
                       isSelected
                         ? 'bg-[#87110c] text-white border-red-800 font-bold shadow-md ring-1 ring-red-400'
@@ -294,6 +353,98 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
                 )}
               </div>
             </div>
+          ) : selectedRoomId === 'firstFloor' ? (
+            /* First Floor Sector Overview */
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between border-b border-[#cfc09f] pb-1">
+                <span className="text-stamp-red font-bold text-[11px] tracking-wider">
+                  SECTOR DOSSIER: FIRST FLOOR (GROUND LEVEL)
+                </span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-[#87110c] text-white">
+                  3 ACTIVE SITES
+                </span>
+              </div>
+
+              <div>
+                <h4 className="font-serif-display text-base font-bold text-[#24130a] leading-tight">
+                  First Floor Architectural Sector &amp; Crime Scene
+                </h4>
+                <p className="font-garamond text-xs text-[#382618] mt-1 leading-relaxed">
+                  The ground level houses the primary crime scene (Sir White’s private Study Room), the Grand Dining Hall where the convocation dinner took place, and the emergency Forensic Examination Laboratory. Verandas encircle the perimeter with direct access to the garden and dock path.
+                </p>
+              </div>
+
+              <div className="p-2.5 bg-[#eae1c9] rounded text-[10px] space-y-2 text-[#3d2c1c] border border-[#d2c4a2]">
+                <div>
+                  <strong className="text-[#87110c]">FIRST FLOOR CHAMBERS (CLICK TO INSPECT):</strong>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 mt-1.5">
+                    {Object.values(ROOMS)
+                      .filter((r) => r.floor === 'First Floor')
+                      .map((r) => (
+                        <button
+                          key={r.id}
+                          onClick={() => handleRoomSelect(r.id)}
+                          className="p-1.5 bg-[#f5ebd6] hover:bg-[#ebdcc0] border border-[#ded1b6] rounded text-left transition-colors cursor-pointer group"
+                        >
+                          <span className="font-bold text-[#87110c] block group-hover:text-red-800 text-[10px]">
+                            {r.shortName || r.name}
+                          </span>
+                          <span className="text-[9px] text-[#55412e] line-clamp-1">{r.suspectsLinked}</span>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+                <div className="border-t border-[#d8cbb0] pt-1.5 text-[9.5px] text-[#4a3928]">
+                  <strong>SECTOR PROTOCOL:</strong> All outer veranda doors sealed. Forensic personnel station located in the south wing laboratory.
+                </div>
+              </div>
+            </div>
+          ) : selectedRoomId === 'secondFloor' ? (
+            /* Second Floor Sector Overview */
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between border-b border-[#cfc09f] pb-1">
+                <span className="text-stamp-red font-bold text-[11px] tracking-wider">
+                  SECTOR DOSSIER: SECOND FLOOR (RESIDENTIAL)
+                </span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-[#87110c] text-white">
+                  4 GUEST CHAMBERS
+                </span>
+              </div>
+
+              <div>
+                <h4 className="font-serif-display text-base font-bold text-[#24130a] leading-tight">
+                  Second Floor Private Quarters &amp; Balconies
+                </h4>
+                <p className="font-garamond text-xs text-[#382618] mt-1 leading-relaxed">
+                  The upper level contains the private bedrooms of the household and convocation guests: Mrs Amber, Master Cerulean, Lady Violet, and Miss Scarlet. Corridors connect each room to the central staircase and exterior balustrades overlooking the manor grounds.
+                </p>
+              </div>
+
+              <div className="p-2.5 bg-[#eae1c9] rounded text-[10px] space-y-2 text-[#3d2c1c] border border-[#d2c4a2]">
+                <div>
+                  <strong className="text-[#87110c]">SECOND FLOOR CHAMBERS (CLICK TO INSPECT):</strong>
+                  <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+                    {Object.values(ROOMS)
+                      .filter((r) => r.floor === 'Second Floor')
+                      .map((r) => (
+                        <button
+                          key={r.id}
+                          onClick={() => handleRoomSelect(r.id)}
+                          className="p-1.5 bg-[#f5ebd6] hover:bg-[#ebdcc0] border border-[#ded1b6] rounded text-left transition-colors cursor-pointer group"
+                        >
+                          <span className="font-bold text-[#87110c] block group-hover:text-red-800 text-[10px]">
+                            {r.shortName || r.name}
+                          </span>
+                          <span className="text-[9px] text-[#55412e] line-clamp-1">{r.suspectsLinked}</span>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+                <div className="border-t border-[#d8cbb0] pt-1.5 text-[9.5px] text-[#4a3928]">
+                  <strong>SECTOR PROTOCOL:</strong> Inter-chamber passage logs secured. All suspect personal effects retained in situ for detective review.
+                </div>
+              </div>
+            </div>
           ) : (
             /* Estate Overview when "Full Map" is selected */
             <div className="space-y-2.5">
@@ -319,18 +470,28 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
                 <div>
                   <strong className="text-[#87110c]">INTERACTIVE SECTOR ZOOM:</strong>
                   <p className="font-garamond text-xs mt-0.5 text-[#24170d]">
-                    Select any chamber in the section below the map to zoom in directly to that room on the architectural blueprint and inspect its evidence docket.
+                    Choose First Floor or Second Floor at the top to zoom directly to that floor plan, or select any specific chamber below to examine individual crime scene evidence.
                   </p>
                 </div>
                 <div className="border-t border-[#d8cbb0] pt-1.5 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[9.5px]">
-                  <div className="bg-[#f5ebd6] p-1.5 rounded border border-[#ded1b6]">
-                    <span className="font-bold text-[#87110c] block">FIRST FLOOR:</span>
+                  <button
+                    onClick={() => handleFloorSelect('First Floor')}
+                    className="bg-[#f5ebd6] hover:bg-[#ebdcc0] p-1.5 rounded border border-[#ded1b6] text-left transition-colors cursor-pointer group"
+                  >
+                    <span className="font-bold text-[#87110c] block group-hover:text-red-800">
+                      🔍 FIRST FLOOR (ZOOM):
+                    </span>
                     <span className="text-[#3b2b1d]">Study Room, Dining Hall, Forensic Lab</span>
-                  </div>
-                  <div className="bg-[#f5ebd6] p-1.5 rounded border border-[#ded1b6]">
-                    <span className="font-bold text-[#87110c] block">SECOND FLOOR:</span>
+                  </button>
+                  <button
+                    onClick={() => handleFloorSelect('Second Floor')}
+                    className="bg-[#f5ebd6] hover:bg-[#ebdcc0] p-1.5 rounded border border-[#ded1b6] text-left transition-colors cursor-pointer group"
+                  >
+                    <span className="font-bold text-[#87110c] block group-hover:text-red-800">
+                      🔍 SECOND FLOOR (ZOOM):
+                    </span>
                     <span className="text-[#3b2b1d]">M. Cerulean, Lady Violet, Mrs Amber, Miss Scarlet</span>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -339,11 +500,19 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
           {/* Action Bar */}
           <div className="mt-2 pt-2 border-t border-[#cfc09f] flex items-center justify-between text-[10px]">
             <span className="font-bold text-[#87110c]">
-              {currentRoom ? `WING: ${currentRoom.floor.toUpperCase()}` : 'OVERVIEW: COMPLETE ESTATE'}
+              {currentRoom
+                ? `WING: ${currentRoom.floor.toUpperCase()}`
+                : selectedRoomId === 'firstFloor'
+                ? 'SECTOR: FIRST FLOOR PLAN'
+                : selectedRoomId === 'secondFloor'
+                ? 'SECTOR: SECOND FLOOR PLAN'
+                : 'OVERVIEW: COMPLETE ESTATE'}
             </span>
             <span className="text-[9.5px] text-[#63503a] font-courier">
               {currentRoom
                 ? `ARCHIVE REF: RM-${currentRoom.id.toUpperCase()}`
+                : selectedRoomId !== 'full'
+                ? 'STATUS: SECTOR ZOOM ACTIVE'
                 : 'STATUS: FIT VIEW ACTIVE'}
             </span>
           </div>
