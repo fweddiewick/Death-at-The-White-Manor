@@ -184,15 +184,16 @@ export const ForensicLabTab: React.FC<ForensicLabTabProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 flex-1 min-h-0">
         {/* Left: Lead Examiner Dr. Esther Feature (3.5 cols) */}
-        <div className="md:col-span-4 lg:col-span-3 paper-texture p-3 rounded border border-[#cfc09f] shadow-paper-sheet flex flex-col items-center text-center justify-between min-h-0 overflow-y-auto custom-scroll">
+        <div className="md:col-span-4 lg:col-span-3 paper-texture p-2.5 sm:p-3 rounded border border-[#cfc09f] shadow-paper-sheet flex flex-col items-center text-center justify-between min-h-0 overflow-y-auto custom-scroll">
           <div className="paperclip -top-3 left-6"></div>
-          <div className="w-full flex justify-between items-center border-b border-[#cfc09f] pb-1 mb-1">
+          <div className="w-full flex justify-between items-center border-b border-[#cfc09f] pb-1 mb-1.5 flex-shrink-0">
             <span className="text-stamp-red font-bold text-[10px]">DR. ESTHER</span>
             <span className="text-[9px] bg-blue-100 text-blue-900 px-1.5 py-0.5 rounded font-bold">
               LAB LEAD
             </span>
           </div>
 
+          {/* Dr. Esther Portrait Frame: dynamically fills & fits the section at all zoom levels */}
           <div
             onClick={() =>
               onInspectImage(
@@ -201,17 +202,17 @@ export const ForensicLabTab: React.FC<ForensicLabTabProps> = ({
                 "Lead Pathologist & Chemical Analyst demonstrating the rapid colorimetric reagent reaction."
               )
             }
-            className="w-32 h-44 rounded overflow-hidden border-2 border-zinc-600 bg-neutral-900 my-1 shadow cursor-pointer group relative flex-shrink-0"
+            className="w-full max-w-[280px] max-h-[380px] aspect-[341/512] rounded overflow-hidden border-2 border-[#2b1b11] bg-white my-1.5 shadow-md cursor-pointer group relative flex-shrink-0 flex items-center justify-center p-1"
             title="Click to enlarge Dr. Esther portrait in Picture Browser"
           >
             <img
               src={drEsther.fullImg}
               alt="Dr. Esther"
-              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity text-white text-[10px]">
-              <Eye className="w-4 h-4 mb-0.5" />
-              <span>ENLARGE</span>
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity text-white text-[10px] font-typewriter">
+              <Eye className="w-4 h-4 mb-0.5 text-amber-200" />
+              <span className="tracking-wider">ENLARGE DOSSIER</span>
             </div>
           </div>
 
