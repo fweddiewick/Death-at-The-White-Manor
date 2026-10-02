@@ -22,11 +22,16 @@ interface RoomTarget {
   label: string;
 }
 
-// Precise room and floor coordinate anchors derived from the 1856x4716 architectural layout
-const ROOM_TARGETS: Record<string, RoomTarget> = {
-  full: { x: 50, y: 50, scale: 1, label: 'Full Estate Map' },
-  firstFloor: { x: 50, y: 74.5, scale: 2.05, label: 'First Floor Overview' },
-  secondFloor: { x: 50, y: 22, scale: 2.05, label: 'Second Floor Overview' },
+// Map asset URLs for Full Estate and dedicated First & Second Floor architectural layouts
+const ESTATE_MAP_URLS = {
+  all: MANOR_LOGOS.blueprint || '/images/manor_map_fairy_point.jpeg',
+  firstFloor: '/images/manor_map_first_floor.jpg',
+  secondFloor: '/images/manor_map_second_floor.jpg'
+};
+
+// Precise room coordinate anchors derived from the 1856x4716 combined layout
+const ALL_MAP_TARGETS: Record<string, RoomTarget> = {
+  full: { x: 50, y: 50, scale: 1, label: 'Full Estate Map (Both Floors)' },
   study: { x: 23, y: 74, scale: 2.7, label: "Sir White's Study Room" },
   dining: { x: 48, y: 61, scale: 2.6, label: 'Dining Hall' },
   amber: { x: 22, y: 14, scale: 2.8, label: "Mrs Amber's Bedroom" },
@@ -36,32 +41,77 @@ const ROOM_TARGETS: Record<string, RoomTarget> = {
   lab: { x: 50, y: 83, scale: 2.7, label: 'Forensic Laboratory' }
 };
 
+// First Floor layout targets (1856 x 2200, matching attached reference layout with zero cutoff)
+const FIRST_FLOOR_TARGETS: Record<string, RoomTarget> = {
+  full: { x: 50, y: 50, scale: 1, label: 'First Floor Full Layout' },
+  firstFloor: { x: 50, y: 50, scale: 1, label: 'First Floor Full Layout' },
+  dining: { x: 48, y: 21.6, scale: 2.3, label: 'Dining Hall' },
+  study: { x: 23, y: 49.5, scale: 2.4, label: "Sir White's Study Room" },
+  lab: { x: 50, y: 68.8, scale: 2.4, label: 'Forensic Laboratory' }
+};
+
+// Second Floor layout targets (1856 x 2200, matching attached reference layout with zero cutoff)
+const SECOND_FLOOR_TARGETS: Record<string, RoomTarget> = {
+  full: { x: 50, y: 50, scale: 1, label: 'Second Floor Full Layout' },
+  secondFloor: { x: 50, y: 50, scale: 1, label: 'Second Floor Full Layout' },
+  amber: { x: 22, y: 22.7, scale: 2.4, label: "Mrs Amber's Bedroom" },
+  cerulean: { x: 77, y: 21.6, scale: 2.4, label: "Master Cerulean's Bedroom" },
+  violet: { x: 22, y: 49.5, scale: 2.4, label: "Lady Violet's Bedroom" },
+  scarlet: { x: 77, y: 50.5, scale: 2.4, label: "Miss Scarlet's Bedroom" }
+};
+
 export const BlueprintTab: React.FC<BlueprintTabProps> = ({
   onInspectImage,
   onNavigateSuspect
 }) => {
-  // 'full' represents the zoomed-out fit view of the entire estate map
-  // 'firstFloor' and 'secondFloor' trigger sector-level floor zoom
+  // 'full' represents the zoomed-out fit view of the currently active floor or estate
   const [selectedRoomId, setSelectedRoomId] = useState<string>('full');
   const [floorFilter, setFloorFilter] = useState<'ALL' | 'First Floor' | 'Second Floor'>('ALL');
 
   const currentRoom = selectedRoomId !== 'full' && selectedRoomId !== 'firstFloor' && selectedRoomId !== 'secondFloor'
     ? ROOMS[selectedRoomId]
     : null;
-  const currentTarget = ROOM_TARGETS[selectedRoomId] || ROOM_TARGETS.full;
+
+  // Select target system and image based on active floor mode
+  const activeImageUrl =
+    floorFilter === 'First Floor'
+      ? ESTATE_MAP_URLS.firstFloor
+      : floorFilter === 'Second Floor'
+      ? ESTATE_MAP_URLS.secondFloor
+      : ESTATE_MAP_URLS.all;
+
+  // Aspect ratio is 1856/2200 for single floor plans, 1856/4716 for combined map
+  const activeAspectRatio =
+    floorFilter === 'ALL' ? '1856 / 4716' : '1856 / 2200';
+
+  const targetMap =
+    floorFilter === 'First Floor'
+      ? FIRST_FLOOR_TARGETS
+      : floorFilter === 'Second Floor'
+      ? SECOND_FLOOR_TARGETS
+      : ALL_MAP_TARGETS;
+
+  const currentTarget = targetMap[selectedRoomId] || targetMap.full;
 
   const filteredRooms = Object.values(ROOMS).filter(
     (r) => floorFilter === 'ALL' || r.floor === floorFilter
   );
 
-  const blueprintUrl = MANOR_LOGOS.blueprint || 'https://imgur.com/a/yyJbnUE';
-
   const handleEnlarge = () => {
-    onInspectImage(
-      blueprintUrl,
-      'White Manor Estate Map & Architectural Blueprint',
-      'The White Manor (Fairy Point 3) full uncropped structural blueprint with all wings and passageways'
-    );
+    const title =
+      floorFilter === 'First Floor'
+        ? 'White Manor First Floor Architectural Plan'
+        : floorFilter === 'Second Floor'
+        ? 'White Manor Second Floor Architectural Plan'
+        : 'White Manor Estate Map & Architectural Blueprint';
+    const caption =
+      floorFilter === 'First Floor'
+        ? 'First Floor full structural blueprint (Kitchen, Dining Hall, Study Room, Living Hall, Forensic Lab)'
+        : floorFilter === 'Second Floor'
+        ? 'Second Floor full structural blueprint (Amber, Cerulean, Violet, Scarlet chambers & Balcony)'
+        : 'The White Manor (Fairy Point 3) full uncropped structural blueprint with all wings and passageways';
+
+    onInspectImage(activeImageUrl, title, caption);
   };
 
   const handleFloorSelect = (floor: 'ALL' | 'First Floor' | 'Second Floor') => {
@@ -120,8 +170,8 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
                 }`}
                 title={
                   floor === 'ALL'
-                    ? 'Zoom out to view both floors (Complete Estate)'
-                    : `Zoom in to view only the entire ${floor}`
+                    ? 'View both floors (Complete Estate)'
+                    : `View only the entire ${floor} layout`
                 }
               >
                 {floor === 'ALL' ? 'ALL FLOORS' : floor}
@@ -154,19 +204,19 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
 
           {/* Interactive Zoom Canvas Container (Guaranteed Uncropped, Fit View by default) */}
           <div className="relative w-full flex-1 rounded border border-zinc-700 bg-[#0a0706] flex items-center justify-center min-h-0 overflow-hidden p-1.5">
-            {/* Aspect-Ratio Matched Viewport: exactly matches 1856 x 4716 map dimensions */}
+            {/* Aspect-Ratio Matched Viewport: exactly matches active floor layout (1856x2200 or 1856x4716) */}
             <div
               className="relative max-h-full max-w-full flex items-center justify-center transition-transform duration-700 ease-out"
               style={{
-                aspectRatio: '1856 / 4716',
+                aspectRatio: activeAspectRatio,
                 height: '100%',
                 transform: `scale(${currentTarget.scale})`,
                 transformOrigin: `${currentTarget.x}% ${currentTarget.y}%`
               }}
             >
               <img
-                src={blueprintUrl}
-                alt="White Manor Map Blueprint"
+                src={activeImageUrl}
+                alt={currentTarget.label}
                 onError={(e) => {
                   e.currentTarget.src = '/images/manor_map_fairy_point.jpeg';
                 }}
@@ -191,14 +241,31 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
             </div>
 
             {/* Top Left Floating Quick Reset / Zoom Out Button */}
-            {selectedRoomId !== 'full' ? (
+            {isChamberTarget ? (
+              <button
+                onClick={() =>
+                  setSelectedRoomId(
+                    floorFilter === 'First Floor'
+                      ? 'firstFloor'
+                      : floorFilter === 'Second Floor'
+                      ? 'secondFloor'
+                      : 'full'
+                  )
+                }
+                className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 bg-black/85 hover:bg-black text-amber-200 rounded text-[10px] border border-amber-800/70 backdrop-blur-sm transition-all cursor-pointer shadow-lg animate-fadeIn"
+                title={`Zoom out to ${floorFilter === 'ALL' ? 'Full Map' : floorFilter}`}
+              >
+                <ZoomOut className="w-3.5 h-3.5 text-amber-400" />
+                <span>ZOOM OUT ({floorFilter === 'ALL' ? 'FULL MAP' : 'FLOOR VIEW'})</span>
+              </button>
+            ) : selectedRoomId !== 'full' || floorFilter !== 'ALL' ? (
               <button
                 onClick={handleResetFullMap}
                 className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 bg-black/85 hover:bg-black text-amber-200 rounded text-[10px] border border-amber-800/70 backdrop-blur-sm transition-all cursor-pointer shadow-lg animate-fadeIn"
-                title="Zoom out to Full Map overview (both floors)"
+                title="View complete 2-story estate map"
               >
-                <ZoomOut className="w-3.5 h-3.5 text-amber-400" />
-                <span>ZOOM OUT (FULL MAP)</span>
+                <Compass className="w-3.5 h-3.5 text-amber-400" />
+                <span>VIEW BOTH FLOORS</span>
               </button>
             ) : (
               <div className="absolute top-2 left-2 pointer-events-none bg-black/75 px-2 py-0.5 rounded text-[9px] font-mono text-zinc-300 border border-zinc-700/80 backdrop-blur-sm">
