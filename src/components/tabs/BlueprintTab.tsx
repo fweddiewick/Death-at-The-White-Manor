@@ -25,7 +25,7 @@ interface RoomTarget {
 // Precise room coordinate anchors derived from the 1856x4716 architectural layout
 const ROOM_TARGETS: Record<string, RoomTarget> = {
   full: { x: 50, y: 50, scale: 1, label: 'Full Estate Map' },
-  study: { x: 77, y: 61, scale: 2.7, label: "Sir White's Study Room" },
+  study: { x: 23, y: 74, scale: 2.7, label: "Sir White's Study Room" },
   dining: { x: 48, y: 61, scale: 2.6, label: 'Dining Hall' },
   amber: { x: 22, y: 14, scale: 2.8, label: "Mrs Amber's Bedroom" },
   cerulean: { x: 77, y: 13.5, scale: 2.8, label: "Master Cerulean's Bedroom" },
@@ -135,21 +135,18 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
                 className="w-full h-full object-contain pointer-events-auto select-none"
               />
 
-              {/* Pulsing Pin Marker on Targeted Room when zoomed in */}
+              {/* Pulsing Red Indicator on Targeted Room (Unobstructed, keeping blueprint details clear) */}
               {selectedRoomId !== 'full' && (
                 <div
-                  className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center animate-fadeIn"
+                  className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center animate-fadeIn"
                   style={{
                     left: `${currentTarget.x}%`,
                     top: `${currentTarget.y}%`
                   }}
                 >
-                  <span className="relative flex h-6 w-6 items-center justify-center">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-600 border-2 border-white shadow-lg"></span>
-                  </span>
-                  <span className="mt-1 px-1.5 py-0.5 bg-black/90 text-amber-200 border border-amber-500/80 rounded text-[9px] font-courier whitespace-nowrap shadow-md tracking-wider">
-                    {currentTarget.label}
+                  <span className="relative flex h-5 w-5 items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600 border border-white shadow-lg"></span>
                   </span>
                 </div>
               )}
@@ -168,6 +165,16 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
             ) : (
               <div className="absolute top-2 left-2 pointer-events-none bg-black/75 px-2 py-0.5 rounded text-[9px] font-mono text-zinc-300 border border-zinc-700/80 backdrop-blur-sm">
                 FIT VIEW • COMPLETE ESTATE
+              </div>
+            )}
+
+            {/* Bottom Center Floating Label: In scale with page typography, unobstructing the blueprint */}
+            {selectedRoomId !== 'full' && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-1.5 px-2 py-0.5 bg-black/85 text-amber-200 border border-amber-900/60 rounded backdrop-blur-sm shadow-md animate-fadeIn max-w-[50%] truncate">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse flex-shrink-0"></span>
+                <span className="text-[8.5px] font-courier uppercase tracking-wider font-bold truncate">
+                  {currentTarget.label}
+                </span>
               </div>
             )}
 
