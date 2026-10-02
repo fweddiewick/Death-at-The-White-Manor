@@ -7,7 +7,6 @@ import {
   Copy,
   Check,
   FolderArchive,
-  Link2,
   Youtube,
   Sparkles
 } from 'lucide-react';
@@ -16,17 +15,9 @@ export const VideoVaultTab: React.FC = () => {
   const VAULT_SHAREPOINT_URL =
     'https://senokoenergy-my.sharepoint.com/:f:/p/federickwoo/IgAX50Kbbb2cRJ72UZQKqsBmARM44IJw7ccMUcKf8dCSBTU?e=BepbgQ';
 
-  const DEFAULT_HIGHLIGHT_VIDEO_URL = 'https://youtu.be/hhk2QbUhTDI';
+  const HIGHLIGHT_VIDEO_URL = 'https://youtu.be/Yo1uxczv6fw';
 
-  const [highlightVideoUrl, setHighlightVideoUrl] = useState<string>(
-    DEFAULT_HIGHLIGHT_VIDEO_URL
-  );
-  const [videoInput, setVideoInput] = useState<string>(
-    DEFAULT_HIGHLIGHT_VIDEO_URL
-  );
-  const [showUrlEditor, setShowUrlEditor] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [savedSuccess, setSavedSuccess] = useState(false);
 
   // Canvas and DataURL state for the high-contrast gradient QR Code
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -111,19 +102,7 @@ export const VideoVaultTab: React.FC = () => {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const handleSaveUrl = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (videoInput.trim()) {
-      setHighlightVideoUrl(videoInput.trim());
-      setSavedSuccess(true);
-      setTimeout(() => {
-        setSavedSuccess(false);
-        setShowUrlEditor(false);
-      }, 1500);
-    }
-  };
-
-  const embedUrl = getEmbedUrl(highlightVideoUrl);
+  const embedUrl = getEmbedUrl(HIGHLIGHT_VIDEO_URL);
 
   return (
     <section className="flex flex-col gap-2 h-full font-typewriter select-none">
@@ -140,50 +119,11 @@ export const VideoVaultTab: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowUrlEditor(!showUrlEditor)}
-            className="flex items-center gap-1 px-2.5 py-0.5 bg-[#2a1e17] hover:bg-[#3d2b20] text-amber-200 rounded border border-amber-900/60 text-[10px] transition-colors cursor-pointer"
-            title="Update Highlight Reel URL"
-          >
-            <Link2 className="w-3 h-3 text-amber-400" />
-            <span>{showUrlEditor ? 'HIDE REEL SETTINGS' : 'EDIT REEL URL'}</span>
-          </button>
           <span className="rubber-stamp text-[#87110c] border-[#87110c] text-[9px]">
             ARCHIVE READY
           </span>
         </div>
       </div>
-
-      {/* Optional URL Editor Bar */}
-      {showUrlEditor && (
-        <form
-          onSubmit={handleSaveUrl}
-          className="flex flex-wrap items-center gap-2 p-2 bg-[#eae2cb] rounded border border-[#cfc09f] text-xs flex-shrink-0 animate-fadeIn"
-        >
-          <Youtube className="w-4 h-4 text-red-600 flex-shrink-0" />
-          <span className="font-bold text-[10.5px] text-[#2c1d11]">YOUTUBE REEL URL:</span>
-          <input
-            type="text"
-            value={videoInput}
-            onChange={(e) => setVideoInput(e.target.value)}
-            placeholder="Paste YouTube video link (e.g. https://youtu.be/... or https://www.youtube.com/watch?v=...)"
-            className="flex-1 min-w-[200px] px-2 py-1 bg-white border border-[#cfc09f] rounded text-xs font-mono focus:outline-none focus:ring-1 focus:ring-[#87110c]"
-          />
-          <button
-            type="submit"
-            className="px-3 py-1 bg-[#87110c] hover:bg-[#9e1610] text-white rounded text-[10.5px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
-          >
-            {savedSuccess ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-green-300" />
-                <span>SAVED!</span>
-              </>
-            ) : (
-              <span>UPDATE REEL</span>
-            )}
-          </button>
-        </form>
-      )}
 
       {/* Main Grid: YouTube Highlight Reel (Larger) & SharePoint Picture Vault (Compact) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 flex-1 min-h-0">
@@ -207,7 +147,7 @@ export const VideoVaultTab: React.FC = () => {
                 <Youtube className="w-12 h-12 text-red-500 mb-2" />
                 <p className="text-sm font-bold text-zinc-200">No YouTube Reel URL provided</p>
                 <p className="text-xs text-zinc-500 mt-1">
-                  Click &ldquo;EDIT REEL URL&rdquo; to paste your YouTube link
+                  Video feed is currently unavailable
                 </p>
               </div>
             )}
@@ -223,7 +163,7 @@ export const VideoVaultTab: React.FC = () => {
             </div>
 
             <a
-              href={highlightVideoUrl}
+              href={HIGHLIGHT_VIDEO_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
