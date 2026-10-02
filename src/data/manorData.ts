@@ -107,7 +107,7 @@ export interface ForensicResult {
 export const MANOR_LOGOS = {
   main: "https://lh3.googleusercontent.com/aida-public/AB6AXuBKUuRm5icsz_XWnhTJDVXSafev5FvFZHadBwICipO6nkw-64_AJq0t7FR14XL9MPRz7nLy9p5oukJTgtyLK1csdOULXYWuFItU93I3nan1GTxz83yl68fLGtIMbD5ChqSHLEaRP48E37HPYu7dTcMgWKDi3qDsf3UdEdgCCDX5JWRAvMIpnDf1JUIUxl8H0257w8ORhoIr76reQAynjKL_AXgkqvazi_n2fXe5xcZsYppZR-m9Nj30-6DoIe4S9mk",
   schedule: "https://lh3.googleusercontent.com/aida-public/AB6AXuClPJx5iyvtbcwiRZP-C0h_Bd1TX82MMF6XNE3tJnSYJ3g1FHWtRxjK5hC-Drn9XaUSC5U_uv37m7qI4h6avKyH3yTks-vD_xQonlaEzmvjk2BNxpTxfghhrGKfl3K9lKmUMD0v6wboXo8lsh8wmSHp3hJ5-jzG5GHMRPhAA3T7LlwjZotx-E2H8bZJtuMVCwKS1fV8DYgJ1K9oNQbKyG6teEGC-W9hCBOksuqcgbXTHSWjWu2rzzw2zGIwzrRPmyY",
-  blueprint: "https://i.imgur.com/gAsGad2.jpeg",
+  blueprint: "https://imgur.com/a/yyJbnUE",
   teamAssignmentChart: "https://lh3.googleusercontent.com/aida-public/AB6AXuAn-zZKbHFpcIlWzszb9uvPUAbWWvF-Y4IMJiT7MekKaWXXuAUOxp-mAedh_tHV3aft8WvY9GDv_f62is5EL_Dao8d9wckUTtVmpQUmoj4pAoMJe78YQM55G-b01sc5cHmL9WJXsXK9ZrI4211CEHLK2VatoNdjtqN957BBaXdA4Sw0VZBsNAis4XFQ-Op7Lc28rEz2j8Fvv4JqofukAgXfDeebV1Dk1_phSfD7fOytBXNOHj1o5LJyFxX0uoTnAjI"
 };
 

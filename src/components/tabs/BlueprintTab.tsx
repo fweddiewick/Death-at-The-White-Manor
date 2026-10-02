@@ -49,7 +49,7 @@ export const BlueprintTab: React.FC<BlueprintTabProps> = ({
     (r) => floorFilter === 'ALL' || r.floor === floorFilter
   );
 
-  const blueprintUrl = MANOR_LOGOS.blueprint || 'https://i.imgur.com/gAsGad2.jpeg';
+  const blueprintUrl = MANOR_LOGOS.blueprint || 'https://imgur.com/a/yyJbnUE';
 
   const handleEnlarge = () => {
     onInspectImage(

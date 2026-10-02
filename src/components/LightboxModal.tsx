@@ -88,6 +88,9 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
             <img
               src={imageUrl}
               alt={title}
+              onError={(e) => {
+                e.currentTarget.src = '/images/manor_map_fairy_point.jpeg';
+              }}
               className="max-h-[75vh] w-auto object-contain rounded border border-zinc-700 shadow-2xl"
             />
           </div>
