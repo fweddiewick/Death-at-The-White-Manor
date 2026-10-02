@@ -141,7 +141,7 @@ export const SuspectsTab: React.FC<SuspectsTabProps> = ({
         </div>
 
         {/* Right Typewritten Profile Data */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between space-y-2.5 font-courier min-h-0">
+        <div className="flex-1 min-w-0 flex flex-col space-y-2.5 font-courier min-h-0">
           <div>
             <div className="text-[9px] text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
               <span>CRIMINAL INVESTIGATION DIVISION</span>
@@ -200,7 +200,7 @@ export const SuspectsTab: React.FC<SuspectsTabProps> = ({
           </div>
 
           {/* Bottom Action Footer */}
-          <div className="pt-2 border-t border-zinc-300 flex items-center justify-between text-[11px]">
+          <div className="pt-2 border-t border-zinc-300 flex items-center justify-between text-[11px] mt-auto">
             <span className="font-bold text-[10px] text-zinc-700">
               {suspect.classification}
             </span>
